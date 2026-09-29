@@ -1,0 +1,177 @@
+schemaVersion: "1.0"
+
+solution:
+  name: "UniPG — спорт рядом в MAX"
+  teamId: "UniPG"
+
+api:
+  baseUrl: "https://unipg.ru"
+  openapi: "./openapi.yaml"
+  defaultHeaders:
+    Accept: "application/json"
+
+checks:
+  - id: "health"
+    name: "API availability"
+    method: "GET"
+    path: "/api/health"
+    role: "public"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields: ["status", "service"]
+      bodySchema:
+        type: "object"
+        required: ["status", "service"]
+        properties:
+          status: {type: "string"}
+          service: {type: "string"}
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "list-venues"
+    name: "List sports venues"
+    method: "GET"
+    path: "/api/venues"
+    role: "public"
+    request:
+      query:
+        lat: 55.7558
+        lng: 37.6173
+        radius: 5000
+        sport: "all"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields: ["items", "meta"]
+      bodySchema:
+        type: "object"
+        required: ["items", "meta"]
+        properties:
+          items: {type: "array"}
+          meta: {type: "object"}
+    timeoutMs: 15000
+    repeatable: true
+
+  - id: "list-activities"
+    name: "List active events"
+    method: "GET"
+    path: "/api/activities"
+    role: "public"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      bodySchema:
+        type: "array"
+        items: {type: "object"}
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "create-activity"
+    name: "Create test event"
+    method: "POST"
+    path: "/api/activities"
+    role: "public"
+    request:
+      headers:
+        Content-Type: "application/json"
+      body:
+        venue_id: "api-verification-venue"
+        venue_name: "API verification venue"
+        address: "Москва"
+        nearest_metro: "Охотный Ряд"
+        lat: 55.7558
+        lng: 37.6173
+        title: "API verification event"
+        sport_type: "football"
+        starts_at: "2099-12-31T18:00:00Z"
+        max_players: 5
+        creator_id: "api-test-organizer"
+        creator_name: "API Test Organizer"
+        age_restriction: "all"
+    expected:
+      statusCodes: [201]
+      contentType: "application/json"
+      requiredFields: ["id", "title", "starts_at", "current_players", "max_players"]
+      bodySchema:
+        type: "object"
+        required: ["id", "title", "starts_at", "current_players", "max_players"]
+        properties:
+          id: {type: "integer"}
+          title: {type: "string"}
+          starts_at: {type: "string"}
+          current_players: {type: "integer"}
+          max_players: {type: "integer"}
+    timeoutMs: 5000
+    repeatable: false
+    extract:
+      activityId: "$.id"
+
+  - id: "join-activity"
+    name: "Join test event"
+    method: "POST"
+    path: "/api/activities/{activity_id}/join"
+    role: "public"
+    dependsOn: ["create-activity"]
+    request:
+      path:
+        activity_id: "${activityId}"
+      query:
+        user_id: "api-test-participant"
+        user_name: "API Test Participant"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields: ["id", "current_players", "max_players"]
+      bodySchema:
+        type: "object"
+        required: ["id", "current_players", "max_players"]
+        properties:
+          id: {type: "integer"}
+          current_players: {type: "integer"}
+          max_players: {type: "integer"}
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "list-user-activities"
+    name: "List participant events"
+    method: "GET"
+    path: "/api/users/{user_id}/activities"
+    role: "public"
+    dependsOn: ["join-activity"]
+    request:
+      path:
+        user_id: "api-test-participant"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      bodySchema:
+        type: "array"
+        items: {type: "object"}
+    timeoutMs: 5000
+    repeatable: true
+
+  - id: "leave-activity"
+    name: "Leave test event"
+    method: "DELETE"
+    path: "/api/activities/{activity_id}/join"
+    role: "public"
+    dependsOn: ["list-user-activities"]
+    request:
+      path:
+        activity_id: "${activityId}"
+      query:
+        user_id: "api-test-participant"
+    expected:
+      statusCodes: [200]
+      contentType: "application/json"
+      requiredFields: ["id", "current_players", "max_players"]
+      bodySchema:
+        type: "object"
+        required: ["id", "current_players", "max_players"]
+        properties:
+          id: {type: "integer"}
+          current_players: {type: "integer"}
+          max_players: {type: "integer"}
+    timeoutMs: 5000
+    repeatable: false

@@ -1,0 +1,28 @@
+{
+  "description": "Reproducible data for the UniPG API verification flow",
+  "activity": {
+    "venue_id": "api-verification-venue",
+    "venue_name": "API verification venue",
+    "address": "Москва",
+    "nearest_metro": "Охотный Ряд",
+    "lat": 55.7558,
+    "lng": 37.6173,
+    "title": "API verification event",
+    "sport_type": "football",
+    "starts_at": "2099-12-31T18:00:00Z",
+    "max_players": 5,
+    "creator_id": "api-test-organizer",
+    "creator_name": "API Test Organizer",
+    "age_restriction": "all"
+  },
+  "participant": {
+    "user_id": "api-test-participant",
+    "user_name": "API Test Participant"
+  },
+  "venue_query": {
+    "lat": 55.7558,
+    "lng": 37.6173,
+    "radius": 5000,
+    "sport": "all"
+  }
+}

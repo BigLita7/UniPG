@@ -338,7 +338,15 @@ async def lifespan(_: FastAPI):
         await reminder_task
 
 
-app = FastAPI(title="UniPG API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(
+    title="UniPG API",
+    version="0.2.0",
+    lifespan=lifespan,
+    servers=[
+        {"url": "https://unipg.ru", "description": "Production"},
+        {"url": "http://localhost:8000", "description": "Local Docker"},
+    ],
+)
 
 allowed_origins = [
     value.strip()

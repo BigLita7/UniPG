@@ -120,8 +120,11 @@ unipg/
 │   └── start-production.sh      # Запуск backend и бота
 ├── systemd/
 │   └── unipg.service            # Запуск приложения через systemd
+├── test-data/
+│   └── api-test-data.json       # Данные для воспроизводимой проверки API
 │
 ├── .env.example                 # Пример настроек окружения
+├── DATA-API.yaml                # Сценарий автоматической проверки API
 ├── compose.yaml                 # Настройка Docker Compose
 ├── Dockerfile                   # Сборка Docker-образа
 ├── openapi.yaml                 # Описание REST API
@@ -281,6 +284,10 @@ MAX Bot API. MAX WebApp Bridge передаёт Mini App сведения о п�
 При первом запуске backend автоматически создаёт таблицы SQLite и добавляет
 несколько примеров площадок с возможностью аренды.
 
+Данные для воспроизводимой проверки REST API находятся в
+`test-data/api-test-data.json`. Те же значения используются в автоматическом
+сценарии `DATA-API.yaml`.
+
 События и участники заранее не создаются. Тестовое событие нужно создать через
 Mini App:
 
@@ -369,3 +376,17 @@ docker compose up -d --build
 docker compose ps
 docker compose logs --tail=100 web
 ```
+
+## 16. Материалы для проверки API
+
+- базовый адрес API: [https://unipg.ru](https://unipg.ru);
+- проверка доступности: [https://unipg.ru/api/health](https://unipg.ru/api/health);
+- интерактивная документация: [https://unipg.ru/docs](https://unipg.ru/docs);
+- OpenAPI 3.1: `openapi.yaml`;
+- конфигурация обязательных проверок: `DATA-API.yaml`;
+- воспроизводимые данные: `test-data/api-test-data.json`.
+
+REST API текущей версии не требует авторизации и не содержит отдельных ролей,
+поэтому тестовые учётные записи для автоматической проверки не нужны. Для
+проверки пользовательского сценария внутри MAX используются обычные аккаунты MAX,
+открывшие Mini App через бота.
