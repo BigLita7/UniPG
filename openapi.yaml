@@ -1,0 +1,648 @@
+openapi: 3.1.0
+info:
+  title: UniPG API
+  version: 0.2.0
+paths:
+  /api/health:
+    get:
+      summary: Health
+      operationId: health_api_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Api Health Get
+  /api/config:
+    get:
+      summary: Config
+      operationId: config_api_config_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Config Api Config Get
+  /api/venues:
+    get:
+      summary: Get Venues
+      operationId: get_venues_api_venues_get
+      parameters:
+      - name: lat
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 90
+          minimum: -90
+          default: 55.7558
+          title: Lat
+      - name: lng
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 180
+          minimum: -180
+          default: 37.6173
+          title: Lng
+      - name: radius
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20000
+          minimum: 500
+          default: 5000
+          title: Radius
+      - name: sport
+        in: query
+        required: false
+        schema:
+          type: string
+          default: all
+          title: Sport
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 80
+          default: ''
+          title: Q
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Venues Api Venues Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/activities:
+    get:
+      summary: Get Activities
+      operationId: get_activities_api_activities_get
+      parameters:
+      - name: venue_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Venue Id
+      - name: sport
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sport
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Get Activities Api Activities Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      summary: Create Activity
+      operationId: create_activity_api_activities_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Activity Api Activities Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/activities/{activity_id}/join:
+    post:
+      summary: Join Activity
+      operationId: join_activity_api_activities__activity_id__join_post
+      parameters:
+      - name: activity_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Activity Id
+      - name: user_id
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+          default: ''
+          title: User Id
+      - name: user_name
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+          default: ''
+          title: User Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Join Activity Api Activities  Activity Id  Join Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Leave Activity
+      operationId: leave_activity_api_activities__activity_id__join_delete
+      parameters:
+      - name: activity_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Activity Id
+      - name: user_id
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+          default: ''
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Leave Activity Api Activities  Activity Id  Join Delete
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/profile:
+    post:
+      summary: Upsert Profile
+      operationId: upsert_profile_api_profile_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Upsert Profile Api Profile Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/profile/{user_id}:
+    get:
+      summary: Get Profile
+      operationId: get_profile_api_profile__user_id__get
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Profile Api Profile  User Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/users/{user_id}/activities:
+    get:
+      summary: Get User Activities
+      operationId: get_user_activities_api_users__user_id__activities_get
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Get User Activities Api Users  User Id  Activities
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/activities/{activity_id}/participants:
+    get:
+      summary: Get Activity Participants
+      operationId: get_activity_participants_api_activities__activity_id__participants_get
+      parameters:
+      - name: activity_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Activity Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Get Activity Participants Api Activities  Activity
+                  Id  Participants Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/activities/{activity_id}/chat:
+    post:
+      summary: Register Event Chat
+      operationId: register_event_chat_api_activities__activity_id__chat_post
+      parameters:
+      - name: activity_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Activity Id
+      - name: chat_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Chat Id
+      - name: invite_link
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ''
+          title: Invite Link
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Register Event Chat Api Activities  Activity Id  Chat
+                  Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Event Chat
+      operationId: get_event_chat_api_activities__activity_id__chat_get
+      parameters:
+      - name: activity_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Activity Id
+      - name: user_id
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 100
+          default: ''
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Event Chat Api Activities  Activity Id  Chat Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/rentals:
+    post:
+      summary: Create Rental
+      operationId: create_rental_api_rentals_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueRentalCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Rental Api Rentals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Rentals
+      operationId: get_rentals_api_rentals_get
+      parameters:
+      - name: venue_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          title: Venue Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Get Rentals Api Rentals Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/rentable-venue-ids:
+    get:
+      summary: Get Rentable Venue Ids
+      operationId: get_rentable_venue_ids_api_rentable_venue_ids_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+                title: Response Get Rentable Venue Ids Api Rentable Venue Ids Get
+components:
+  schemas:
+    ActivityCreate:
+      properties:
+        venue_id:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Venue Id
+        venue_name:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Venue Name
+        address:
+          type: string
+          maxLength: 240
+          title: Address
+          default: ''
+        nearest_metro:
+          type: string
+          maxLength: 120
+          title: Nearest Metro
+          default: ''
+        lat:
+          type: number
+          title: Lat
+        lng:
+          type: number
+          title: Lng
+        title:
+          type: string
+          maxLength: 120
+          minLength: 3
+          title: Title
+        sport_type:
+          type: string
+          title: Sport Type
+        starts_at:
+          type: string
+          format: date-time
+          title: Starts At
+        max_players:
+          type: integer
+          maximum: 50.0
+          minimum: 2.0
+          title: Max Players
+        creator_id:
+          type: string
+          maxLength: 100
+          title: Creator Id
+          default: ''
+        creator_name:
+          type: string
+          maxLength: 100
+          title: Creator Name
+          default: ''
+        age_restriction:
+          type: string
+          title: Age Restriction
+          default: all
+      type: object
+      required:
+      - venue_id
+      - venue_name
+      - lat
+      - lng
+      - title
+      - sport_type
+      - starts_at
+      - max_players
+      title: ActivityCreate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ProfileCreate:
+      properties:
+        user_id:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: User Id
+        name:
+          type: string
+          maxLength: 160
+          title: Name
+          default: ''
+        birth_date:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Birth Date
+      type: object
+      required:
+      - user_id
+      title: ProfileCreate
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VenueRentalCreate:
+      properties:
+        venue_id:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Venue Id
+        venue_name:
+          type: string
+          maxLength: 160
+          title: Venue Name
+          default: ''
+        price_per_hour:
+          type: integer
+          maximum: 100000.0
+          minimum: 0.0
+          title: Price Per Hour
+        currency:
+          type: string
+          maxLength: 10
+          title: Currency
+          default: RUB
+        description:
+          type: string
+          maxLength: 500
+          title: Description
+          default: ''
+        phone:
+          type: string
+          maxLength: 30
+          title: Phone
+          default: ''
+        available_hours:
+          type: string
+          maxLength: 60
+          title: Available Hours
+          default: ''
+      type: object
+      required:
+      - venue_id
+      - price_per_hour
+      title: VenueRentalCreate

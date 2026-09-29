@@ -1,0 +1,17 @@
+[Unit]
+Description=UniPG Service (FastAPI + MAX Bot)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/max_sport
+EnvironmentFile=/var/www/max_sport/.env
+ExecStart=/bin/sh /var/www/max_sport/scripts/start-production.sh
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

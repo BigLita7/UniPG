@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Python
+.venv/
+venv/
+mini_app/backend/venv/
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+.mypy_cache/
+mini_app/backend/*.db
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/

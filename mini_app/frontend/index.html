@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0c121e">
+    <meta name="description" content="UniPG — спортивные площадки и игры рядом в Москве">
+    <title>UniPG — спорт рядом</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <style>
+        /* Аварийная защита: интерфейс остаётся читаемым, даже если внешний CSS не загрузился. */
+        html, body { margin: 0; }
+        svg { width: 1.25rem; height: 1.25rem; }
+    </style>
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+    <link rel="stylesheet" href="./styles.css?v=20260929-1">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="map-stage" aria-label="Карта спортивных площадок Москвы">
+            <div id="map"></div>
+
+            <header class="topbar">
+                <a class="brand" href="/" aria-label="UniPG">
+                    <span class="brand-mark" aria-hidden="true">U</span>
+                    <span>UniPG</span>
+                </a>
+
+                <form class="search" id="search-form" role="search">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+                    <input id="search-input" type="search" maxlength="80" placeholder="Площадка, стадион или адрес" autocomplete="off">
+                    <button class="search-clear" id="search-clear" type="button" aria-label="Очистить поиск">×</button>
+                </form>
+
+                <button class="icon-button locate-button" id="locate-button" type="button" aria-label="Показать моё местоположение">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+                </button>
+            </header>
+
+            <div class="filter-row" aria-label="Фильтры площадок">
+                <label class="select-chip">
+                    <span class="sr-only">Вид спорта</span>
+                    <select id="sport-filter">
+                        <option value="all">Все виды спорта</option>
+                        <option value="football">Футбол</option>
+                        <option value="basketball">Баскетбол</option>
+                        <option value="volleyball">Волейбол</option>
+                        <option value="tennis">Теннис</option>
+                        <option value="workout">Воркаут</option>
+                    </select>
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg>
+                </label>
+                <button class="chip is-active" id="show-venues" type="button" aria-pressed="true">Площадки</button>
+                <button class="chip" id="show-games" type="button" aria-pressed="false">Игры</button>
+                <button class="chip my-events-button" id="my-events-button" type="button">
+                    Мои записи
+                    <span id="my-events-count">0</span>
+                </button>
+            </div>
+
+            <div class="map-message" id="map-message" role="status" aria-live="polite">Загружаем карту…</div>
+        </main>
+
+        <button class="floating-panel-btn" id="floating-panel-btn" type="button" aria-label="Открыть список площадок">
+            <span>📋 Спорт рядом</span>
+            <span class="floating-count-pill" id="floating-count">0</span>
+        </button>
+
+        <aside class="results-panel" id="results-panel" aria-label="Площадки рядом">
+            <button class="sheet-handle" id="sheet-handle" type="button" aria-label="Свернуть или развернуть список">
+                <span class="handle-bar"></span>
+                <span class="handle-caption" id="handle-caption">Спорт рядом · <b id="handle-count">…</b></span>
+            </button>
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Москва</p>
+                    <h1 id="results-title">Спорт рядом</h1>
+                </div>
+                <div class="panel-header-actions">
+                    <span class="count-badge" id="results-count">0</span>
+                    <button class="panel-close-btn" id="panel-close-btn" type="button" aria-label="Скрыть окно">✕</button>
+                </div>
+            </div>
+
+            <p class="panel-caption" id="results-caption">Выберите площадку на карте или в списке</p>
+            <div class="results-list" id="results-list" aria-live="polite"></div>
+        </aside>
+
+        <aside class="detail-panel" id="detail-panel" aria-label="Информация о площадке" aria-hidden="true">
+            <div class="detail-scroll">
+                <button class="back-button" id="detail-close" type="button">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                    Все площадки
+                </button>
+
+                <div class="venue-hero">
+                    <span class="venue-icon" aria-hidden="true">●</span>
+                    <p class="eyebrow">Спортивная площадка</p>
+                    <h2 id="detail-name"></h2>
+                    <p class="detail-address" id="detail-address"></p>
+                </div>
+
+                <div class="fact-grid">
+                    <div class="fact-card">
+                        <span>Ближайшее метро</span>
+                        <strong id="detail-metro">—</strong>
+                    </div>
+                    <div class="fact-card">
+                        <span>От центра карты</span>
+                        <strong id="detail-distance">—</strong>
+                    </div>
+                    <div class="fact-card">
+                        <span>Оценка в 2ГИС</span>
+                        <strong id="detail-rating">—</strong>
+                    </div>
+                    <div class="fact-card">
+                        <span>Фотографии</span>
+                        <strong id="detail-photos">—</strong>
+                    </div>
+                </div>
+
+                <a class="twogis-link" id="detail-2gis-link" href="https://2gis.ru/moscow" target="_blank" rel="noopener noreferrer">
+                    Фото и отзывы в 2ГИС
+                    <span aria-hidden="true">↗</span>
+                </a>
+
+                <div class="detail-rental" id="detail-rental">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">Услуги</p>
+                            <h3>Аренда площадки</h3>
+                        </div>
+                    </div>
+                    <div class="fact-grid">
+                        <div class="fact-card">
+                            <span>Стоимость</span>
+                            <strong id="rental-price">—</strong>
+                        </div>
+                        <div class="fact-card">
+                            <span>Телефон</span>
+                            <a id="rental-phone" href="#"><strong>—</strong></a>
+                        </div>
+                    </div>
+                    <p class="rental-description" id="rental-description"></p>
+                </div>
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Расписание</p>
+                        <h3>Игры на площадке</h3>
+                    </div>
+                </div>
+                <div class="games-list" id="games-list"></div>
+
+                <button class="primary-button" id="open-create" type="button">Создать игру на этой площадке</button>
+                <p class="auth-note">В веб-версии создание доступно без профиля. Авторизацию добавим при подключении к MAX.</p>
+            </div>
+        </aside>
+    </div>
+
+    <dialog class="create-dialog" id="create-dialog">
+        <form id="create-form" method="dialog">
+            <div class="dialog-heading">
+                <div>
+                    <p class="eyebrow">Новая игра</p>
+                    <h2>Собрать команду</h2>
+                </div>
+                <button class="dialog-close" id="create-close" type="button" aria-label="Закрыть">×</button>
+            </div>
+
+            <div class="selected-venue">
+                <span aria-hidden="true">●</span>
+                <div>
+                    <strong id="form-venue-name"></strong>
+                    <small id="form-venue-address"></small>
+                </div>
+            </div>
+
+            <label class="field">
+                <span>Название игры</span>
+                <input name="title" required minlength="3" maxlength="120" placeholder="Например, футбол 5×5">
+            </label>
+
+            <div class="form-grid">
+                <label class="field">
+                    <span>Вид спорта</span>
+                    <select name="sport_type" required>
+                        <option value="football">Футбол</option>
+                        <option value="basketball">Баскетбол</option>
+                        <option value="volleyball">Волейбол</option>
+                        <option value="tennis">Теннис</option>
+                        <option value="workout">Воркаут</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Игроков</span>
+                    <input name="max_players" type="number" min="2" max="50" value="10" required>
+                </label>
+            </div>
+
+            <label class="field">
+                <span>Дата и время</span>
+                <input name="starts_at" type="datetime-local" required>
+            </label>
+
+            <label class="field">
+                <span>Ссылка на чат в MAX (необязательно)</span>
+                <input name="chat_invite_link" type="url" placeholder="https://max.ru/join/...">
+            </label>
+
+            <p class="form-error" id="form-error" role="alert"></p>
+            <button class="primary-button" id="create-submit" type="submit">Опубликовать игру</button>
+        </form>
+    </dialog>
+
+    <dialog class="create-dialog my-events-dialog" id="my-events-dialog">
+        <div class="dialog-content">
+            <div class="dialog-heading">
+                <div>
+                    <p class="eyebrow">Ваше расписание</p>
+                    <h2>Мои записи</h2>
+                </div>
+                <button class="dialog-close" id="my-events-close" type="button" aria-label="Закрыть">×</button>
+            </div>
+            <p class="my-events-caption">Игры, в которых вы участвуете в этом браузере.</p>
+            <div class="my-events-list" id="my-events-list" aria-live="polite"></div>
+        </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://mapgl.2gis.com/api/js/v1"></script>
+    <script src="https://unpkg.com/@2gis/mapgl-clusterer@^2/dist/clustering.js"></script>
+    <script src="./app.js?v=20260929-1" defer></script>
+</body>
+</html>

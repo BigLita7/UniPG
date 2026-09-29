@@ -1,0 +1,9 @@
+.git
+.env
+.venv
+mini_app/backend/venv
+mini_app/backend/__pycache__
+mini_app/backend/*.db
+node_modules
+npm-debug.log
+.DS_Store
